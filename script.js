@@ -7,6 +7,7 @@ const itemFilter = document.getElementById('filter');
 function displayItems() {
     const itemsFromStorage = getItemsFromStorage();
     itemsFromStorage.forEach((item) => addItemToDom(item));
+    checkUI();
 }
 
 function onAddItemSubmit(e) {
@@ -78,19 +79,40 @@ function createIcon(classes) {
     return Icon;
 }
 
-function removeItem(e) {
+function onClickItem(e) {
     if (e.target.parentElement.classList.contains('remove-item')) {
-        if (confirm('Are you sure ?')) {     
-            e.target.parentElement.parentElement.remove();
-            checkUI();
-        }
-    } 
+        removeItem(e.target.parentElement.parentElement);
+
+        checkUI();
+    }
 }
 
+function removeItem(item) {
+    if (confirm('Are You Sure ?')) {
+    // Remove From The DOM
+        item.remove();
+
+    // Remove From Local Storage
+        removeItemFromStorage(item.textContent);
+    }
+}
+
+function removeItemFromStorage(item) {
+    let itemsFromStorage = getItemsFromStorage();
+
+    // filter out items to be removed 
+    itemsFromStorage = itemsFromStorage.filter((i) => i != item);
+
+    // Re-set to localstorage 
+    localStorage.setItem('items', JSON.stringify(itemsFromStorage));
+}
 function removeAll(e) {
     while (itemList.firstChild) {
         itemList.removeChild(itemList.firstChild);
     }
+
+    // Clear From Local Storage
+    localStorage.removeItem('items');
 
     checkUI();
 }
@@ -122,7 +144,7 @@ function checkUI(){
 }
 // Event Listeners 
 itemForm.addEventListener('submit',onAddItemSubmit);
-itemList.addEventListener('click',removeItem);
+itemList.addEventListener('click',onClickItem);
 clearBtn.addEventListener('click',removeAll);
 itemFilter.addEventListener('input',filterItems);
 document.addEventListener('DOMContentLoaded',displayItems);
